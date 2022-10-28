@@ -1,5 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from .models import Movie, Actor
+from .forms import ReleaseForm
+from django.shortcuts import render
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from .models import Movie, Actor
 
 # Define the home view
@@ -19,34 +23,50 @@ def actors_index(request):
 
 def movies_detail(request, movie_id):
   movie = Movie.objects.get(id=movie_id)
-  return render(request, 'movies/detail.html', { 'movie': movie })
+  release_form = ReleaseForm()
+  return render(request, 'movies/detail.html', {
+     'movie': movie, 'release_form': release_form })
+
+def add_release(request, movie_id):
+  form = ReleaseForm(request.POST)
+  if form.is_valid():
+    new_release = form.save(commit=False)
+    new_release.movie_id = movie_id
+    new_release.save()
+  return redirect('movie_detail', movie_id=movie_id)
+
+class MovieCreate(CreateView):
+  model = Movie
+  fields = ['title','genre','description',]
+  success_url = '/movies/'
+
+class MovieUpdate(UpdateView):
+  model = Movie
+  # Let's disallow the renaming of a cat by excluding the name field!
+  fields = ['title','genre','description',]
+  success_url = '/movies/'
+
+class MovieDelete(DeleteView):
+  model = Movie
+  success_url = '/movies/'
+
+class ActorCreate(CreateView):
+  model = Actor
+  fields = ['name','description','age']
+  success_url = '/actors/'
+
+class ActorUpdate(UpdateView):
+  model = Actor
+  # Let's disallow the renaming of a cat by excluding the name field!
+  fields = ['name','description','age']
+  success_url = '/actors/'
+
+
+class ActorDelete(DeleteView):
+  model = Actor
+  success_url = '/actors/'
 
 def actors_detail(request, actor_id):
   actor = Actor.objects.get(id=actor_id)
   return render(request, 'actors/detail.html', { 'actor': actor })
-
-# # Add the Cat class & list and view function below the imports
-# class Movie:  # Note that parens are optional if not inheriting from another class
-#   def __init__(self, title, genre, description):
-#     self.title = title
-#     self.genre = genre
-#     self.description = description
-
-# movies = [
-#   Movie('Superbad', 'Comedy', 'foul and raunchy'),
-#   Movie('Mortal Kombat', 'Action', 'Violent and cheesey'),
-#   Movie('Up', 'pixar comedy', 'cute and quaint')
-# ]
-
-# class Actor:  # Note that parens are optional if not inheriting from another class
-#   def __init__(self, name, description, age):
-#     self.name = name
-#     self.description = description
-#     self.age = age
-
-# actors = [
-#   Actor('Seth Rogan', 'silly', 35),
-#   Actor('Tom Holland', 'Young and aspiring', 25),
-#   Actor('Cassie Huellete', 'my roommate', 25)
-# ]
 
