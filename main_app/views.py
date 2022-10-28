@@ -21,11 +21,25 @@ def actors_index(request):
   actors = Actor.objects.all()
   return render(request, 'actors/index.html', { 'actors': actors })
 
+
 def movies_detail(request, movie_id):
   movie = Movie.objects.get(id=movie_id)
+  # Get the toys the cat doesn't have
+  actors_movie_doesnt_have = Actor.objects.exclude(id__in = movie.actor.all().values_list('id'))
   release_form = ReleaseForm()
   return render(request, 'movies/detail.html', {
-     'movie': movie, 'release_form': release_form })
+    'movie': movie, 'release_form': release_form,
+    # Add the toys to be displayed
+    'actors': actors_movie_doesnt_have
+  })
+
+
+
+def assoc_actor(request, movie_id, actor_id):
+  # Note that you can pass a toy's id instead of the whole object
+  Movie.objects.get(id=movie_id).actor.add(actor_id)
+  return redirect('movie_detail', movie_id=movie_id)
+
 
 def add_release(request, movie_id):
   form = ReleaseForm(request.POST)

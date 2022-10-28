@@ -11,11 +11,22 @@ RATINGS = (
     ('R', 'Restricted'),
     ('UR', 'Unrated'),
 )
+class Actor(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(max_length=250)
+    age = models.IntegerField()
+
+    def __str__(self):
+        return self.name
+    
+    def get_absolute_url(self):
+        return reverse('detail', kwargs={'actor_id': self.id})
 
 class Movie(models.Model):
     title = models.CharField(max_length=100)
     genre = models.CharField(max_length=100)
     description = models.TextField(max_length=250)
+    actor = models.ManyToManyField(Actor)
 
     def __str__(self):
         return self.name
@@ -39,14 +50,3 @@ class Release(models.Model):
     
     class Meta:
         ordering = ['-date']
-
-class Actor(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField(max_length=250)
-    age = models.IntegerField()
-
-    def __str__(self):
-        return self.name
-    
-    def get_absolute_url(self):
-        return reverse('detail', kwargs={'actor_id': self.id})
